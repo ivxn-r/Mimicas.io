@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Mímicas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Times New Roman, sans-serif;
+            background: linear-gradient(130deg, #ff6b6b 33%, #ee5a6f 33%, #c44569 33%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .palabra {
+            background: black;
+            color: #F2F2F2;
+            padding: 60px 30px;
+            border-radius: 20px;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            word-break: break-word;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+        .timer {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        button {
+            background: black;
+            color: #F2F2F2;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .instrucciones {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="inicio">
+            <h1> MÍMICAS</h1>
+            <div class="instrucciones">
+                <p>Pon el teléfono en tu frente</p>
+<p><img src="https://img.icons8.com/?size=100&id=100000&format=png&color=000000" style="width: 30px; height: 30px;"> Inclina ARRIBA = Correcto</p>
+<p><img src="https://img.icons8.com/?size=100&id=99271&format=png&color=000000" style="width: 30px; height: 30px;"> Inclina ABAJO = Incorrecto</p>
+
+            </div>
+            <button onclick="iniciarJuego()">JUGAR</button>
+        </div>
+
+        <div id="juego" class="hidden">
+            <div class="timer" id="tiempo">60</div>
+           <div class="stats">
+    <div>
+        <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" style="width: 25px; height: 25px; vertical-align: middle;">
+        <span id="correctas">0</span>
+    </div>
+    <div>
+        <img src="https://img.icons8.com/?size=100&id=7703&format=png&color=FA5252" style="width: 25px; height: 25px; vertical-align: middle;">
+        <span id="saltadas">0</span>
+    </div>
+</div>
+            <div class="palabra" id="palabra">PERRO</div>
+            <p style="margin-top: 20px; opacity: 0.8;">Inclina el teléfono ⬆️ o ⬇️</p>
+        </div>
+
+        <div id="resultado" class="hidden">
+            <h1> ¡FIN!</h1>
+            <div class="palabra" id="puntuacion-final">0</div>
+            <p style="font-size: 1.3em; margin: 20px 0;">Palabras correctas</p>
+            <button onclick="location.reload()">JUGAR DE NUEVO</button>
+        </div>
+    </div>
+
+    <script>
+        const palabras = [
+            'PERRO', 'GATO', 'ELEFANTE', 'LEÓN', 'TIGRE', 'MONO', 'JIRAFA',
+            'PIZZA', 'HAMBURGUESA', 'HELADO', 'SUSHI', 'TACO',
+            'FÚTBOL', 'BASKETBALL', 'NATACIÓN', 'BOXEO', 'TENIS',
+            'MÉDICO', 'BOMBERO', 'POLICÍA', 'CHEF', 'PILOTO',
+            'DORMIR', 'COMER', 'BAILAR', 'CORRER', 'CANTAR', 'NADAR',
+            'COCHE', 'AVIÓN', 'BICICLETA', 'TELÉFONO', 'GUITARRA'
+        ];
+
+        let correctas = 0;
+        let saltadas = 0;
+        let tiempo = 60;
+        let juegoActivo = false;
+        let orientacionInicial = null;
+        let palabrasUsadas = [];
+
+        function obtenerPalabraAleatoria() {
+            let disponibles = palabras.filter(p => !palabrasUsadas.includes(p));
+            if (disponibles.length === 0) {
+                palabrasUsadas = [];
+                disponibles = palabras;
+            }
+            const palabra = disponibles[Math.floor(Math.random() * disponibles.length)];
+            palabrasUsadas.push(palabra);
+            return palabra;
+        }
+
+        function iniciarJuego() {
+            document.getElementById('inicio').classList.add('hidden');
+            document.getElementById('juego').classList.remove('hidden');
+            
+            correctas = 0;
+            saltadas = 0;
+            tiempo = 60;
+            juegoActivo = true;
+            palabrasUsadas = [];
+            
+            document.getElementById('palabra').textContent = obtenerPalabraAleatoria();
+            
+            const intervalo = setInterval(() => {
+                tiempo--;
+                document.getElementById('tiempo').textContent = tiempo;
+                
+                if (tiempo <= 0) {
+                    clearInterval(intervalo);
+                    finalizarJuego();
+                }
+            }, 1000);
+        }
+
+        function finalizarJuego() {
+            juegoActivo = false;
+            document.getElementById('juego').classList.add('hidden');
+            document.getElementById('resultado').classList.remove('hidden');
+            document.getElementById('puntuacion-final').textContent = correctas;
+        }
+
+        function palabraCorrecta() {
+            if (!juegoActivo) return;
+            correctas++;
+            document.getElementById('correctas').textContent = correctas;
+            document.getElementById('palabra').textContent = obtenerPalabraAleatoria();
+            reproducirSonido(800);
+        }
+
+        function saltarPalabra() {
+            if (!juegoActivo) return;
+            saltadas++;
+            document.getElementById('saltadas').textContent = saltadas;
+            document.getElementById('palabra').textContent = obtenerPalabraAleatoria();
+            reproducirSonido(400);
+        }
+
+        function reproducirSonido(frecuencia) {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = frecuencia;
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        window.addEventListener('deviceorientation', (event) => {
+            if (!juegoActivo) return;
+            
+            const beta = event.beta;
+            
+            if (orientacionInicial === null) {
+                orientacionInicial = beta;
+                return;
+            }
+            
+            const diferencia = beta - orientacionInicial;
+            
+            if (diferencia < -30) {
+                palabraCorrecta();
+                orientacionInicial = null;
+            } else if (diferencia > 30) {
+                saltarPalabra();
+                orientacionInicial = null;
+            }
+        });
+    </script>
+</body>
+</html>
